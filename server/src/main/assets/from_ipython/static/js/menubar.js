@@ -127,6 +127,9 @@ var IPython = (function (IPython) {
         this.element.find('#to_code > a').click(function () {
             IPython.notebook.to_code();
         });
+        this.element.find('#to_init_code > a').click(function () {
+            IPython.notebook.to_init_code();
+        });
         this.element.find('#to_markdown > a').click(function () {
             IPython.notebook.to_markdown();
         });

@@ -64,7 +64,7 @@ object Server extends Logging {
     PropertyConfigurator.configure(getClass.getResource("/log4j.server.properties"))
     logDebug("Classpath: " + System.getProperty("java.class.path"))
 
-    val secure = !args.contains("--disable_security")
+    val secure = args.contains("--enable_security")
 
     logInfo("Running SN Server in " + config.notebooksDir.getAbsolutePath)
     val host = "127.0.0.1"

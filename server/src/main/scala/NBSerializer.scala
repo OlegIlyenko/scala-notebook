@@ -17,13 +17,16 @@ object NBSerializer {
   case class ScalaStream(text: String, stream: String) extends Output
 
   trait Cell
-  case class CodeCell(input: String, language: String, collapsed: Boolean,prompt_number:Option[Int], outputs: List[Output]) extends Cell
+  case class CodeCell(input: String, language: String, init: Boolean, collapsed: Boolean,prompt_number:Option[Int], outputs: List[Output]) extends Cell
   case class MarkdownCell(source: String) extends Cell
   case class RawCell(source: String) extends Cell
   case class HeadingCell(source: String, level: Int) extends Cell
-  case class Metadata(name: String, user_save_timestamp: Date, auto_save_timestamp: Date)  {
-    def this(name: String) = this(name, new Date(0), new Date(0))
-  }
+  case class Metadata(name: String,
+                      dependencies: List[String] = Nil,
+                      run_automatically: Boolean = false,
+                      show_input_by_default: Boolean = false,
+                      user_save_timestamp: Date = new Date(0),
+                      auto_save_timestamp: Date = new Date(0))
   case class Worksheet(cells: List[Cell])
   case class Notebook(metadata: Metadata, worksheets: List[Worksheet], autosaved: List[Worksheet], nbformat: Option[Int]) {
     def name = metadata.name

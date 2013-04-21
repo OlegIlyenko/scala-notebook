@@ -10,7 +10,7 @@ import net.liftweb.json.Serialization
  */
 
 class NBSerializerTests extends FlatSpec {
-  val testnb = Notebook(new Metadata("ken1"), List(Worksheet(List(CodeCell("1+2", "python", false, Some(2), List(ScalaOutput(2, None, Some("3"))))))), Nil, None)
+  val testnb = Notebook(new Metadata("ken1"), List(Worksheet(List(CodeCell("1+2", "python", false, false, Some(2), List(ScalaOutput(2, None, Some("3"))))))), Nil, None)
 
   "Notebook Serializer" should "write and read back a simple notebook" in {
     val s = NBSerializer.write(testnb)
@@ -24,7 +24,7 @@ class NBSerializerTests extends FlatSpec {
     val nb = NBSerializer.read(ipData)
     assert (nb.name === "Untitled2")
     nb.worksheets.head.cells.head match {
-      case CodeCell("1+2", _, _, _, _) =>
+      case CodeCell("1+2", _, _, _, _, _) =>
       case x => throw new TestFailedException("Expected serialized notebook, got " + x, 0)
     }
   }

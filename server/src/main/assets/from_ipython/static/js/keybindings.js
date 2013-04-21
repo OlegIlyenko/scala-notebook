@@ -56,12 +56,13 @@ var IPython = (function (IPython) {
          { key: 'ctrl+m, v', desc: "Paste Cell", fcn: function() {this.nb.paste_cell(); return false} },
          
          { key: 'ctrl+m, y', desc: "Code Cell", fcn: function() {this.nb.to_code(); return false} },
+         { key: 'ctrl+m, n', desc: "Init Code Cell", fcn: function() {this.nb.to_init_code(); return false} },
          { key: 'ctrl+m, m', desc: "Markdown Cell", fcn: function() {this.nb.to_markdown(); return false} },
          { key: 'ctrl+m, t', desc: "Text Cell", fcn: function() {this.nb.to_raw(); return false} },
          { key: 'ctrl+m, [1-6]', desc: "Header Cell (1-6)", fcn: function(e, jc) {this.nb.to_heading(undefined, parseInt(e.keyCode - 48)); return false}},
          
-         { key: 'ctrl+enter', desc: "Run Cell", fcn: function() {this.nb.execute_selected_cell(); return false} },
-         { key: 'ctrl+shift+enter', desc: "Run Cell In Place", fcn: function() {this.nb.execute_selected_cell({terminal:true, hideInput: false}); return false} },
+         { key: 'ctrl+shift+enter', desc: "Run Cell", fcn: function() {this.nb.execute_selected_cell(); return false} },
+         { key: 'ctrl+enter', desc: "Run Cell In Place", fcn: function() {this.nb.execute_selected_cell({terminal:true, hideInput: false}); return false} },
          { key: 'alt+enter', desc: "Run All", fcn: function() {this.nb.execute_all_cells(); return false} },
          { key: 'alt+shift+enter', desc: "Run From Selected", fcn: function() {this.nb.execute_cells_from(); return false} },
          
@@ -69,6 +70,7 @@ var IPython = (function (IPython) {
          { key: 'alt+o', desc: "Output Only", fcn: function() {this.nb.all_cell_visibility(false, true); return false}},
          { key: 'alt+i', desc: "Input Only", fcn: function() {this.nb.all_cell_visibility(true, false); return false}},
          { key: 'alt+a', desc: "Show All", fcn: function() {this.nb.all_cell_visibility(true, true); return false}},
+         { key: 'alt+x', desc: "Edit Code Cell", fcn: function() {this.nb.get_selected_cell().show_sections(!this.nb.showInput, true); return false}},
          { key: 'ctrl+shift+o', desc: "Toggle Output", fcn: function() {this.nb.toggle_output(); return false} , alt:'ctrl+m, o'},
          { key: 'ctrl+shift+i', desc: "Toggle Input", fcn: function() {this.nb.toggle_input(); return false} , alt:'ctrl+m, i'},
          

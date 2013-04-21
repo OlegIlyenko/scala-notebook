@@ -39,6 +39,7 @@ class ClientAuthTests extends WordSpec with MustMatchers with BeforeAndAfterAll 
       serverThread = Thread.currentThread()
       Thread.currentThread().setName("main") // Unfiltered exits upon input via System.in unless thread name is 'main' !?
       //Thread.currentThread().setDaemon(true)
+
       Server.startServer(ScalaNotebookConfig.defaults, ServerHost, ServerPort, security) {
         (http, app) =>
           server = http
@@ -54,7 +55,7 @@ class ClientAuthTests extends WordSpec with MustMatchers with BeforeAndAfterAll 
     serverThread.interrupt()
   }
 
-  val testnb = Notebook(new Metadata("sample"), List(Worksheet(List(CodeCell("1+2", "python", false, Some(2), List(ScalaOutput(2, None, Some("3"))))))), Nil, None)
+  val testnb = Notebook(new Metadata("sample"), List(Worksheet(List(CodeCell("1+2", "python", false, false, Some(2), List(ScalaOutput(2, None, Some("3"))))))), Nil, None)
 
   def sessionCookie = {
     val sessCookie = new BasicClientCookie("sessID" + ServerPort, security.sessionKey)

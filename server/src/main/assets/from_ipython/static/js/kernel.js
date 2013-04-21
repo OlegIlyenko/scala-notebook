@@ -46,10 +46,11 @@ var IPython = (function (IPython) {
         return msg;
     };
 
-    Kernel.prototype.start = function (notebook_id, callback) {
+    Kernel.prototype.start = function (notebook_id, nbName, callback) {
         var that = this;
+
         if (!this.running) {
-            var qs = $.param({notebook:notebook_id});
+            var qs = $.param({notebook:notebook_id, notebookName: nbName});
             var url = this.base_url + '?' + qs;
             $.post(url,
                 function (kernel_id) {
@@ -61,9 +62,9 @@ var IPython = (function (IPython) {
     };
 
 
-    Kernel.prototype.restart = function (callback) {
+    Kernel.prototype.restart = function (nbName, callback) {
         $([IPython.events]).trigger('status_restarting.Kernel');
-        var url = this.kernel_url + "/restart";
+        var url = this.kernel_url + "/restart" + "?" + $.param({notebookName: nbName});
         var that = this;
         if (this.running) {
             this.stop_channels();

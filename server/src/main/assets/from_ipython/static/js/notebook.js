@@ -350,6 +350,42 @@ var IPython = (function (IPython) {
         return this;
     };
 
+    Notebook.prototype.has_dep = function (name) {
+        for (var i = 0; i < this.metadata.dependencies.length; i++) {
+            if (this.metadata.dependencies[i] === name) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    Notebook.prototype.add_dep = function (name) {
+        if (!this.has_dep(name)){
+            this.metadata.dependencies.push(name)
+            this.set_dirty();
+        }
+
+        return this;
+    };
+
+    Notebook.prototype.remove_dep = function (name) {
+        var found = -1
+
+        for (var i = 0; i < this.metadata.dependencies.length; i++) {
+            if (this.metadata.dependencies[i] === name) {
+                found = i
+                break
+            }
+        }
+
+        if (found >= 0){
+            this.metadata.dependencies.splice(found, 1);
+            this.set_dirty();
+        }
+
+        return this;
+    };
 
     Notebook.prototype.insert_cell_below = function (type, index) {
         // type = ('code','html','markdown')
@@ -359,6 +395,9 @@ var IPython = (function (IPython) {
         if (this.ncells() === 0 || this.is_valid_cell_index(index)) {
             if (type === 'code') {
                 cell = new IPython.CodeCell(this);
+                cell.set_input_prompt();
+            } if (type === 'code-init') {
+                cell = new IPython.CodeCell(this, true);
                 cell.set_input_prompt();
             } else if (type === 'markdown') {
                 cell = new IPython.MarkdownCell(this);
@@ -419,13 +458,14 @@ var IPython = (function (IPython) {
     };
 
 
-    Notebook.prototype.to_code = function (index) {
+    Notebook.prototype.to_code = function (index, init) {
         var i = this.index_or_selected(index);
         if (this.is_valid_cell_index(i)) {
             var source_element = this.get_cell_element(i);
             var source_cell = source_element.data("cell");
-            if (!(source_cell instanceof IPython.CodeCell)) {
-                target_cell = this.insert_cell_below('code',i);
+            if (!(source_cell instanceof IPython.CodeCell) ||
+                    (source_cell instanceof IPython.CodeCell && (init && !source_cell.init || !init && source_cell.init))) {
+                var target_cell = this.insert_cell_below('code' + (init ? "-init" : ""),i);
                 var text = source_cell.get_text();
                 if (text === source_cell.placeholder) {
                     text = '';
@@ -433,8 +473,12 @@ var IPython = (function (IPython) {
                 target_cell.set_text(text);
                 source_element.remove();
                 this.set_dirty();
-            };
+            }
         };
+    };
+
+    Notebook.prototype.to_init_code = function (index) {
+        this.to_code(index, true)
     };
 
 
@@ -744,7 +788,7 @@ var IPython = (function (IPython) {
 
     Notebook.prototype.start_kernel = function () {
         this.kernel = new IPython.Kernel();
-        this.kernel.start(this.notebook_id, $.proxy(this.kernel_started, this));
+        this.kernel.start(this.notebook_id, this.metadata.name, $.proxy(this.kernel_started, this));
     };
 
 
@@ -762,7 +806,7 @@ var IPython = (function (IPython) {
             close: function() {$(this).dialog('destroy').remove();},
             buttons : {
                 "Restart": function () {
-                    that.kernel.restart($.proxy(that.kernel_started, that));
+                    that.kernel.restart(that.metadata.name, $.proxy(that.kernel_started, that));
                     that.clear_all_output();
                     that.all_cell_visibility(true);
                     $(this).dialog('close');
@@ -959,7 +1003,7 @@ var IPython = (function (IPython) {
         // add_new: should a new cell be added if we are at the end of the nb
         // terminal: execute in terminal mode, which stays in the current cell
     	// hideInput: true to hide input when execution completes
-        default_options = {terminal: false, add_new: true, hideInput: true};
+        default_options = {terminal: false, select_all: false, add_new: true, hideInput: true};
         $.extend(default_options, options);
         var that = this;
         var cell = this.get_selected_cell();
@@ -981,7 +1025,7 @@ var IPython = (function (IPython) {
             cell.render();
         }
         if (default_options.terminal) {
-            cell.select_all();
+            if (default_options.select_all) cell.select_all();
         } else {
             if ((cell_index === (that.ncells()-1)) && default_options.add_new) {
                 that.insert_cell_below('code');
@@ -1231,7 +1275,7 @@ var IPython = (function (IPython) {
     }
 
 
-    Notebook.prototype.load_notebook = function (notebook_name, notebook_id) {
+    Notebook.prototype.load_notebook = function (notebook_name, notebook_id, cb) {
         var that = this;
         this.notebook_id = notebook_id;
         // We do the call with settings so we can set cache to false.
@@ -1245,7 +1289,9 @@ var IPython = (function (IPython) {
         };
         $([IPython.events]).trigger('notebook_loading.Notebook');
         var url = $('body').data('baseProjectUrl') + 'notebooks/' + encodeURIComponent(notebook_name) + '?id=' + this.notebook_id;
-        $.ajax(url, settings);
+        $.ajax(url, settings).done(function () {
+            if (cb) cb()
+        });
     };
 
     

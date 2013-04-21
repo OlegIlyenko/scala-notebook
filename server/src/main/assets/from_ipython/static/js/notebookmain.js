@@ -51,8 +51,75 @@ $(document).ready(function () {
         IPython.layout_manager.do_resize();
         IPython.save_widget.update_url();
     })
-    var body = $('body');
-    IPython.notebook.load_notebook(body.data('notebookName'), body.data('notebookId'));
 
+    var body = $('body');
+    var idCounter = 1
+    var genId = function (name) {
+        idCounter++
+        return name + idCounter
+    }
+
+    var initDeps = function () {
+        $.ajax($('body').data('baseProjectUrl') + 'notebooks', {
+            processData : false,
+            cache : false,
+            type : "GET",
+            dataType : "json",
+            success : function (data, status, xhr) {
+                var deps = $('#dependencies')
+
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].name == IPython.notebook.metadata.name) continue
+
+                    var id = genId("dependency")
+                    var cb = $('<input />', {type: 'checkbox', name: 'dep', id: id})
+                        .data("name", data[i].name)
+                        .prop("checked", IPython.notebook.has_dep(data[i].name))
+                    var label = $("<label />", {'for': id}).addClass('dep-label').text(data[i].name)
+
+                    $("<li>")
+                        .append(cb)
+                        .append(label)
+                        .appendTo(deps)
+
+                    cb.click(function () {
+                        if ($(this).prop("checked")) {
+                            IPython.notebook.add_dep($(this).data("name"))
+                        } else {
+                            IPython.notebook.remove_dep($(this).data("name"))
+                        }
+                    })
+                }
+            },
+            error : $.proxy(IPython.notebook.load_notebook_error, IPython.notebook)
+        });
+    }
+
+    var initSettings = function() {
+        if (IPython.notebook.metadata.run_automatically) {
+            setTimeout(function() {IPython.notebook.execute_all_cells()}, 200)
+            $("#auto_run_check").prop("checked", true)
+        }
+
+        if (IPython.notebook.metadata.show_input_by_default) {
+            IPython.notebook.all_cell_visibility(true, true)
+            $("#auto_all_check").prop("checked", true)
+        }
+
+        $("#auto_run_check").click(function () {
+            IPython.notebook.metadata.run_automatically = $(this).prop("checked")
+            IPython.notebook.set_dirty()
+        })
+
+        $("#auto_all_check").click(function () {
+            IPython.notebook.metadata.show_input_by_default = $(this).prop("checked")
+            IPython.notebook.set_dirty()
+        })
+    }
+
+    IPython.notebook.load_notebook(body.data('notebookName'), body.data('notebookId'), function () {
+        initDeps()
+        initSettings()
+    });
 });
 

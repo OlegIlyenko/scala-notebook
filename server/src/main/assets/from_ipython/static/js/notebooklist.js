@@ -129,7 +129,6 @@ var IPython = (function (IPython) {
         new_item_name.append(
             $('<a/>').
             attr('href', $('body').data('baseProjectUrl')+'view/' + encodeURIComponent(nbname)+((notebook_id)?'?id='+notebook_id:'')).
-            attr('target','_blank').
             text(nbname)
         );
         var e = item.find('.item_name');

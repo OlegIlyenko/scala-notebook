@@ -12,6 +12,16 @@ Based on the IPython notebook project, this project will let you interact with S
 
 While I think this tool will be helpful for everyone using Scala, I expect it to be particularly valuable for the scientific and analytics community.
 
+Features added in this fork
+===========================
+
+* Init code cells - you can define cells that would be used to initialize kernel
+* Dependencies - notebooks can depend on other notebooks and init code you be used to initialize current NB kernel (so it's like shared library)
+* Improved header css
+* Settings
+** Run all cells when you open notebook automatically
+** Always show input in code cells
+* More shortcuts and small improvements
 
 Using Scala Notebook
 ----------------------

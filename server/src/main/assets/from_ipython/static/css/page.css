@@ -89,3 +89,85 @@ span#login_widget {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
 }
+
+.cluster-info {
+    color: #9f9f9f;
+    font-style: italic;
+}
+.dep-label {
+
+    font-size: 1em;
+    color: #909090;
+
+    font-family: "Segoe UI", Arial, Helvetica, Geneva, sans-serif;
+    text-decoration: none;
+
+    padding-left: 5px;
+    vertical-align: middle;
+}
+
+.clusters, #expand_header {
+    -webkit-box-shadow: 0px 10px 23px rgba(50, 50, 50, 0.37);
+    -moz-box-shadow:    0px 10px 23px rgba(50, 50, 50, 0.37);
+    box-shadow:         0px 10px 23px rgba(50, 50, 50, 0.37);
+
+    border-bottom: 1px solid #DBDBDB;
+
+    /* IE10 Consumer Preview */
+    background-image: -ms-linear-gradient(bottom, #D6D6D6 0%, #FFFFFF 100%);
+
+    /* Mozilla Firefox */
+    background-image: -moz-linear-gradient(bottom, #D6D6D6 0%, #FFFFFF 100%);
+
+    /* Opera */
+    background-image: -o-linear-gradient(bottom, #D6D6D6 0%, #FFFFFF 100%);
+
+    /* Webkit (Safari/Chrome 10) */
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #D6D6D6), color-stop(1, #FFFFFF));
+
+    /* Webkit (Chrome 11+) */
+    background-image: -webkit-linear-gradient(bottom, #D6D6D6 0%, #FFFFFF 100%);
+
+    /* W3C Markup, IE10 Release Preview */
+    background-image: linear-gradient(to top, #D6D6D6 0%, #FFFFFF 100%);
+}
+#expand_header {
+    position: relative;
+}
+
+#ribbon .selected .clusters {
+    min-height: 60px;
+}
+
+.output_only .edit-button {
+    display: inline;
+}
+
+.edit-button {
+    display: none;
+}
+
+.edit-button-wrapper {
+    display: block !important;
+}
+
+.option_bar_init {
+    background-color: #CEF0D5 !important;
+    border-left: 1px solid #E6E6E6;
+    border-top: 1px solid #E6E6E6;
+    border-bottom: 1px solid #E6E6E6;
+}
+
+.output_only .option_bar_init {
+    border: none;
+}
+
+.selected .option_bar_init {
+    background-color: #80d576 !important;
+}
+
+#header a {
+    top: -3px;
+    position: relative;
+    left: 2px;
+}

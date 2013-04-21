@@ -13,13 +13,14 @@ var IPython = (function (IPython) {
 
     var utils = IPython.utils;
 
-    var CodeCell = function (notebook) {
+    var CodeCell = function (notebook, init) {
         this.code_mirror = null;
         this.input_prompt_number = null;
         this.is_completing = false;
         this.completion_cursor = null;
         this.outputs = [];
         this.collapsed = false;
+        this.init = init === true;
         this.showInput = true;
         this.tooltip_timeout = null;
         this.clear_out_timeout = null;
@@ -68,14 +69,18 @@ var IPython = (function (IPython) {
             that.notebook.execute_selected_cell();
         }).append('<i class="icon-play"></i>');
 
+        var $edit = $('<a href="#" class="edit-button"></a>').click(function () {
+            that.show_sections(!that.showInput, true);
+        }).append('<i class="icon-pencil"></i>');
+
         var $delete = $('<a href="#"></a>').click(function () {
            that.notebook.delete_cell();
         }).append('<i class="icon-remove"></i>');
 
-
-        var optionBar = $('<div></div>').addClass('option_bar vbox')
+        var optionBar = $('<div></div>').addClass('option_bar vbox ' + (this.init ? "option_bar_init" : ""))
                     .append($('<div></div>').append($run)) 
-                    .append($('<div></div>').append($delete));
+                    .append($('<div></div>').append($delete))
+                    .append($('<div class="edit-button-wrapper"></div>').append($edit));
 
         optionBar.dblclick(function (event) {
             that.show_sections(!that.showInput, true);
@@ -658,7 +663,7 @@ var IPython = (function (IPython) {
         if ((json.latex !== undefined) || (json.html !== undefined)) {
             this.typeset();
         };
-        if (this.hideInputOnResult)
+        if (this.hideInputOnResult && !this.notebook.metadata.show_input_by_default)
           this.hide_input();
     };
 
@@ -974,6 +979,11 @@ var IPython = (function (IPython) {
 
     CodeCell.prototype.fromJSON = function (data) {
         if (data.cell_type === 'code') {
+            if (data.init) {
+                console.info($(".option_bar", this.element).addClass("option_bar_init").get(0))
+                this.init = data.init
+            }
+
             if (data.input !== undefined) {
                 this.set_text(data.input);
             }
@@ -982,6 +992,7 @@ var IPython = (function (IPython) {
             } else {
                 this.set_input_prompt();
             };
+
             var len = data.outputs.length;
             for (var i=0; i<len; i++) {
                 // append with dynamic=false.
@@ -1013,6 +1024,7 @@ var IPython = (function (IPython) {
         data.outputs = outputs;
         data.language = 'scala';
         data.collapsed = this.collapsed;
+        data.init = this.init;
         return data;
     };
 

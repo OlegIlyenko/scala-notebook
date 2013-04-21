@@ -19,6 +19,7 @@ import com.bwater.notebook.util.Logging
 import unfiltered.netty.RequestBinding
 import unfiltered.response._
 import unfiltered.request.Accepts.Accepting
+import com.bwater.notebook.NBSerializer.{Notebook, CodeCell}
 
 /** unfiltered plan */
 class Dispatcher(protected val config: ScalaNotebookConfig,
@@ -195,11 +196,45 @@ class Dispatcher(protected val config: ScalaNotebookConfig,
     }
 
 
-    def startKernel(kernelId: String) = {
+    private def resolveDeps(notebookName: String) = {
+      def loop(name: String, depth: Int = 0): List[(String, Int)] =
+        nbm.load(name) match {
+          case Some(nb) =>
+            (name, depth) +: nb.metadata.dependencies.flatMap(dep => loop(dep, depth + 1))
+          case None =>
+            logError("Can't find notebook for initialization: " + name)
+            Nil
+        }
+
+      loop(notebookName).foldLeft(List[(String, Int)]()) {
+        case (acc, (name, depth)) if acc exists (_._1 == name) =>
+          acc.updated(acc.indexWhere(_._1 == name), (name, math.max(depth, acc.find(_._1 == name).get._2)))
+        case (acc, elem) =>
+          elem :: acc
+      }.sortBy(_._2).reverse.map(_._1)
+    }
+
+    private def findInitCode(nbName: String) =
+      nbm.load(nbName) match {
+        case Some(nb) =>
+          List(nb.worksheets.flatMap(_.cells), nb.autosaved.flatMap(_.cells)).flatten
+            .filter(_.isInstanceOf[CodeCell])
+            .map(_.asInstanceOf[CodeCell])
+            .filter(_.init)
+            .map(_.input)
+        case None =>
+          logError("Can't find notebook for initialization: " + nbName)
+          Nil
+      }
+
+    def startKernel(kernelId: String, notebookName: String) = {
       val compilerArgs = config.kernelCompilerArgs
+
+      val additionalInitScripts = resolveDeps(notebookName) flatMap findInitCode
+
       val initScripts = config.kernelInitScripts
       // Load the user script from disk every time, so user changes are applied whenever a kernel is started/restarted.
-      def kernelMaker = new Kernel(initScripts, compilerArgs, remoteSpawner(kernelId))
+      def kernelMaker = new Kernel(additionalInitScripts ::: initScripts, compilerArgs, remoteSpawner(kernelId))
 
       //TODO: this is a potential memory leak, if the websocket is never opened the router will never be removed...
       kernelRouter ! Router.Put(kernelId, system.actorOf(Props(kernelMaker).withDispatcher("akka.actor.default-stash-dispatcher")))
@@ -212,13 +247,15 @@ class Dispatcher(protected val config: ScalaNotebookConfig,
     val kernelIntent: unfiltered.netty.async.Plan.Intent = {
       case req@POST(Path(Seg("kernels" :: Nil))) =>
         logInfo("Starting kernel")
-        req.respond(startKernel(UUID.randomUUID.toString))
+        val Params(params) = req
+        req.respond(startKernel(UUID.randomUUID.toString, params("notebookName").head))
 
       case req@POST(Path(Seg("kernels" :: kernelId :: "restart" :: Nil))) =>
         logInfo("Restarting kernel " + kernelId)
         vmManager ! VMManager.Kill(kernelId)
         kernelRouter ! Router.Remove(kernelId)
-        req.respond(startKernel(UUID.randomUUID.toString))
+        val Params(params) = req
+        req.respond(startKernel(UUID.randomUUID.toString, params("notebookName").head))
 
       case req@POST(Path(Seg("kernels" :: kernelId :: "interrupt" :: Nil))) =>
         logInfo("Interrupting kernel " + kernelId)
