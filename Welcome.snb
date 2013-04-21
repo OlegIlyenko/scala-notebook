@@ -1,11 +1,11 @@
 {
   "metadata":{
     "name":"Welcome",
-    "dependencies":["Lib"],
+    "dependencies":[],
     "run_automatically":false,
     "show_input_by_default":true,
     "user_save_timestamp":"2013-03-13T21:55:13.342Z",
-    "auto_save_timestamp":"2013-04-21T00:37:03.344Z"
+    "auto_save_timestamp":"2013-04-21T00:52:47.492Z"
   },
   "worksheets":[{
     "cells":[{
@@ -91,8 +91,7 @@
       "input":"// Simple expressions\nList(1,2,3).reverse\n ",
       "language":"scala",
       "init":false,
-      "collapsed":false,
-      "prompt_number":1,
+      "collapsed":true,
       "outputs":[]
     },{
       "cell_type":"code",
@@ -100,7 +99,7 @@
       "language":"scala",
       "init":false,
       "collapsed":false,
-      "prompt_number":2,
+      "prompt_number":16,
       "outputs":[]
     },{
       "cell_type":"code",
@@ -108,7 +107,7 @@
       "language":"scala",
       "init":false,
       "collapsed":false,
-      "prompt_number":3,
+      "prompt_number":17,
       "outputs":[]
     },{
       "cell_type":"code",
@@ -116,7 +115,7 @@
       "language":"scala",
       "init":false,
       "collapsed":false,
-      "prompt_number":4,
+      "prompt_number":18,
       "outputs":[]
     },{
       "cell_type":"code",
@@ -147,7 +146,7 @@
       "input":"",
       "language":"scala",
       "init":false,
-      "collapsed":true,
+      "collapsed":false,
       "outputs":[]
     }]
   }],
